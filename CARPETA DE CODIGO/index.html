@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizidor de Datos Cuántico</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carga de Chart.js y el plugin de Datalabels -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117; /* Fondo oscuro */
+            color: #c9d1d9; /* Texto claro */
+            background-image: linear-gradient(rgba(110, 80, 220, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(110, 80, 220, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        /* Estilo para la tarjeta principal */
+        .main-card {
+            background-color: rgba(22, 27, 34, 0.8);
+            border: 1px solid #30363d;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.2); /* Sombra púrpura */
+            backdrop-filter: blur(10px);
+        }
+
+        /* Estilo para los inputs */
+        .input-field {
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            caret-color: #8b5cf6; /* Cursor púrpura */
+        }
+        .input-field:focus {
+            border-color: #8b5cf6; /* Borde púrpura al enfocar */
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+            outline: none;
+        }
+        
+        /* Estilo para el botón principal */
+        .main-btn {
+            background: linear-gradient(90deg, #8b5cf6, #c026d3);
+            border: 1px solid #c026d3;
+            box-shadow: 0 0 15px rgba(192, 38, 211, 0.4);
+        }
+        .main-btn:hover {
+            background: linear-gradient(90deg, #7c3aed, #a21caf);
+        }
+        
+        /* Estilo para los botones de ejemplo */
+        .example-btn {
+            background-color: rgba(139, 92, 246, 0.1);
+            border: 1px solid #8b5cf6;
+            color: #a78bfa;
+            font-weight: 600;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem; /* rounded-lg */
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .example-btn:hover {
+            background-color: rgba(139, 92, 246, 0.2);
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+        }
+        .example-btn.green {
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 1px solid #10B981;
+            color: #34D399;
+        }
+        .example-btn.green:hover {
+            background-color: rgba(16, 185, 129, 0.2);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Estilos para las tablas (Dark Mode) */
+        .summary-table {
+            min-width: 100%;
+            border: 1px solid #30363d;
+            margin-bottom: 1rem;
+        }
+        .summary-table th {
+            padding: 0.5rem 1rem;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #8b949e; /* Color de encabezado oscuro */
+            letter-spacing: 0.05em;
+            background-color: #161b22; /* Fondo de encabezado oscuro */
+        }
+        .summary-table td {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            border-top: 1px solid #30363d; /* Borde oscuro */
+        }
+        .summary-table-header {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 2px solid #8b5cf6; /* Borde púrpura */
+            padding-bottom: 0.25rem;
+        }
+        
+        /* Ocultar el selector de color original */
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 100%;
+            height: 40px;
+            cursor: pointer;
+            background: none;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+            border-radius: 0.5rem; /* rounded-lg */
+        }
+        input[type="color"]::-webkit-color-swatch {
+            border: 1px solid #30363d;
+            border-radius: 0.5rem; /* rounded-lg */
+        }
+        
+    </style>
+</head>
+<body class="min-h-screen p-4 sm:p-8">
+
+    <div class="max-w-6xl mx-auto">
+            
+        <!-- 1. Encabezado -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">ANALIZIS DE DATOS</h1>
+            <p class="text-sm text-gray-500">CONTACTO: 💬 993897585</p>
+          
+        </header>
+
+        <!-- 2. Tarjeta Principal de Entrada y Configuración -->
+        <main class="main-card rounded-2xl shadow-xl p-6 sm:p-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                <!-- 2a. Columna Izquierda (Entrada de Datos) -->
+                <div>
+                    <h2 class="text-xl font-semibold text-blue-400 mb-3">1. INSERCIÓN DE DATOS </h2>
+                    <textarea id="data-input" 
+                              class="w-full h-48 p-3 rounded-lg focus:outline-none font-mono text-sm input-field"
+                              placeholder="Ej: [4.68, 6.27, 7.70], 'Alto', 5.12, 'Bajo'..."></textarea>
+                    
+                    <!-- SECCIÓN ELIMINADA (IDENTIFICADOR DE VARIABLE) -->
+                </div>
+                
+                <!-- 2b. Columna Derecha (Configuración y Acción) -->
+                <div>
+                    <h2 class="text-xl font-semibold text-blue-400 mb-3">2. CONFIGURACIÓN Y ANÁLISIS</h2>
+
+                    <label for="type-override" class="block text-sm font-medium text-gray-400">NOMBRE DEL ALGORITMO (REQUERIDO)</label>
+                    <select id="type-override" class="mt-1 block w-full rounded-lg shadow-sm text-sm py-3 px-3 focus:outline-none input-field">
+                        <option value="auto" selected>Detección Automática</option>
+                        <option value="qualitative">Cualitativa (Clasificación)</option>
+                        <option value="quantitative_discrete">Cuantitativa (Discreta)</option>
+                        <option value="quantitative_continuous">Cuantitativa (Continua)</option>
+                    </select>
+
+                    <label for="chart-color" class="block text-sm font-medium text-gray-400 mt-6">COLOR DEL GRÁFICO:</label>
+                    <div class="relative mt-1 w-full h-10 rounded-lg border border-purple-500 overflow-hidden">
+                        <input type="color" id="chart-color" value="#8A2BE2" class="absolute inset-0">
+                    </div>
+                    
+                    <button id="analyze-btn" class="main-btn text-white font-bold py-3 px-6 rounded-lg transition duration-200 w-full text-lg mt-8 shadow-lg">
+                        INICIAR ANÁLISIS CUÁNTICO
+                    </button>
+                    
+
+                    <!-- SECCIÓN ELIMINADA (CARGAR SIMULARGOS) -->
+                </div>
+            </div>
+        </main>
+
+        <!-- 3. Área de Resultados (Oculta al inicio) -->
+        <div id="results-area" class="hidden mt-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                <!-- 3a. Panel de Resultados (Tablas) -->
+                <section id="output-pane" class="main-card rounded-2xl shadow-xl p-6 sm:p-8 flex flex-col">
+                    <h2 class="text-2xl font-semibold text-blue-400 mb-4">Resultados del Análisis</h2>
+                    <div id="analysis-output" class="font-mono text-sm text-slate-300 overflow-x-auto">
+                        <!-- El contenido de las tablas se genera aquí -->
+                    </div>
+                </section>
+                
+                <!-- 3b. Panel de Gráfico -->
+                <section id="plot-pane" class="main-card rounded-2xl shadow-xl p-6 sm:p-8 flex flex-col">
+                    <h2 class="text-2xl font-semibold text-blue-400 mb-4">Gráfico Cuántico</h2>
+                    <div id="plot-canvas-container" class="w-full h-full min-h-[400px]">
+                        <canvas id="bar-chart"></canvas>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Declaramos la variable global para el gráfico
+        window.myBarChart = null;
+        
+        // Función para formatear números con precisión (evita -0.000)
+        function formatNumber(num, decimals = 3) {
+            if (num === 0) return num.toFixed(decimals); // Handle 0
+            if (isNaN(num)) return 'N/A';
+            let str = num.toFixed(decimals);
+            if (str.startsWith("-0.00")) {
+                str = str.substring(1); // Quita el "-"
+            }
+            return str;
+        }
+
+        // Esperamos a que el DOM esté cargado
+        document.addEventListener('DOMContentLoaded', (event) => {
+            
+            // --- Capturamos los elementos del DOM ---
+            const analyzeButton = document.getElementById('analyze-btn');
+            const dataInput = document.getElementById('data-input');
+            const analysisOutput = document.getElementById('analysis-output');
+            const chartContext = document.getElementById('bar-chart').getContext('2d');
+            const typeOverrideSelect = document.getElementById('type-override');
+            /* SECCIÓN ELIMINADA: const variableNameInput = document.getElementById('variable-name'); */
+            const chartColorInput = document.getElementById('chart-color');
+            const resultsArea = document.getElementById('results-area');
+
+            <!-- SECCIÓN ELIMINADA (BOTONES DE EJEMPLO JS) -->
+
+            // Registramos el plugin de datalabels globalmente
+            Chart.register(ChartDataLabels);
+            
+            // --- Opciones de Gráfico (Dark Mode) ---
+            const chartOptionsBase = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false, labels: { color: '#c9d1d9' } },
+                    title: { display: true, font: { size: 16 }, color: '#c9d1d9' },
+                    datalabels: {
+                        color: '#ffffff',
+                        anchor: 'end',
+                        align: 'top',
+                        offset: 4,
+                        font: { weight: 'bold' }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Frecuencia (fi)', color: '#8b949e' },
+                        ticks: { color: '#8b949e' },
+                        grid: { color: '#30363d' }
+                    },
+                    x: {
+                        title: { display: true, text: 'Categorías', color: '#8b949e' },
+                        ticks: { color: '#8b949e' },
+                        grid: { color: '#30363d' }
+                    }
+                }
+            };
+
+
+            // --- Escuchamos el clic en el botón ANALIZAR ---
+            analyzeButton.addEventListener('click', () => {
+                
+                // 0. Limpiar el gráfico anterior si existe
+                if (window.myBarChart) {
+                    window.myBarChart.destroy();
+                }
+
+                // --- Mostrar paneles de resultados ---
+                resultsArea.classList.remove('hidden');
+                
+                // Limpiar la consola de salida
+                analysisOutput.innerHTML = '';
+                let outputHtml = ''; // Reseteamos el HTML de salida
+
+                // 1. Obtener y limpiar los datos del textarea
+                const rawData = dataInput.value;
+                const chartColor = chartColorInput.value; // Capturar el color
+                const varName = 'Variable'; // SECCIÓN MODIFICADA: ya no lee el input
+                
+                // --- LÓGICA DE LIMPIEZA ---
+                let cleanedData = rawData
+                    .replace(/^[a-zA-Z0-9_.]+\s*<-\s*c\s*\(/, '') // Elimina "Var <- c("
+                    .replace(/\)$/, '')                         // Elimina el ")" final
+                    .replace(/['"]/g, '');                      // Elimina todas las comillas
+                
+                const values = cleanedData.split(/[\n,]+/)
+                    .map(val => val.trim())
+                    .filter(val => val.length > 0);
+
+                if (values.length === 0) {
+                    analysisOutput.innerHTML = '<span style="color: #EF4444; font-weight: bold;">[ERROR]</span><p>No se encontraron datos. Por favor, introduce datos en el panel de entrada.</p>';
+                    return;
+                }
+                
+                const n = values.length;
+                let isQuantitative_auto = true;
+                let isDiscreta_auto = true;
+                const numericValues = [];
+                const textValues = [];
+
+                // 2. Analizar cada valor (Detección Automática)
+                for (const val of values) {
+                    const num = parseFloat(val);
+                    
+                    if (isNaN(num)) {
+                        isQuantitative_auto = false;
+                        textValues.push(val);
+                    } else {
+                        numericValues.push(num);
+                        if (num % 1 !== 0) {
+                            isDiscreta_auto = false;
+                        }
+                    }
+                }
+                
+                // --- Lógica de Anulación (Override) ---
+                const typeOverride = typeOverrideSelect.value;
+                let isQuantitative;
+                let isDiscreta;
+
+                if ((typeOverride === 'quantitative_discrete' || typeOverride === 'quantitative_continuous') && !isQuantitative_auto && textValues.length > 0) {
+                    analysisOutput.innerHTML = `<span style="color: #F87171; font-weight: bold;">[ERROR DE TIPO]</span><p>Se intentó forzar un tipo <strong>Cuantitativo</strong>, pero se encontraron datos de texto (no numéricos): ${textValues.slice(0, 5).join(', ')}...</p>`;
+                    return;
+                }
+                
+                if (typeOverride === 'qualitative' && isQuantitative_auto) {
+                    isQuantitative = false;
+                    isDiscreta = false;
+                } else {
+                     switch (typeOverride) {
+                        case 'qualitative':
+                            isQuantitative = false;
+                            isDiscreta = false;
+                            break;
+                        case 'quantitative_discrete':
+                            isQuantitative = true;
+                            isDiscreta = true;
+                            break;
+                        case 'quantitative_continuous':
+                            isQuantitative = true;
+                            isDiscreta = false;
+                            break;
+                        case 'auto':
+                        default:
+                            isQuantitative = isQuantitative_auto;
+                            isDiscreta = isDiscreta_auto;
+                    }
+                }
+               
+                // 3. Construir el HTML de resultados
+                outputHtml = `<p><strong>Total de datos (n):</strong> ${n}</p>`;
+                
+                // 4. ESTRUCTURA CONDICIONAL
+                
+                if (!isQuantitative) {
+                    // ============ CASO A: VARIABLE CUALITATIVA ============
+                    outputHtml += `<p><strong>Tipo de Variable:</strong> Cualitativa Nominal</p>`;
+                    const freqMap = {};
+                    values.forEach(val => { freqMap[val] = (freqMap[val] || 0) + 1; });
+                    const categories = Object.keys(freqMap).sort();
+                    
+                    const tableData = categories.map(category => {
+                        const fi = freqMap[category];
+                        const hi = fi / n;
+                        const hiPorc = hi * 100;
+                        return { category, fi, hi, hiPorc };
+                    });
+
+                    // c. Construir tabla HTML
+                    outputHtml += `
+                    <p class="summary-table-header">Tabla de Frecuencias</p>
+                    <table class="summary-table">
+                        <thead class="bg-gray-100">
+                        <tr>
+                            <th>Valor (Xi)</th>
+                            <th class="text-right">fi(Freq)</th>
+                            <th class="text-right">hi</th>
+                            <th class="text-right">hi%</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700">
+                    `;
+                    
+                    let total_fi = 0;
+                    let total_hi = 0;
+                    
+                    tableData.forEach(row => {
+                        total_fi += row.fi;
+                        total_hi += row.hi;
+                        outputHtml += `
+                            <tr>
+                                <td>${row.category}</td>
+                                <td class="text-right">${row.fi}</td>
+                                <td class="text-right">${formatNumber(row.hi)}</td>
+                                <td class="text-right">${formatNumber(row.hiPorc)}%</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    outputHtml += `
+                        <tr class="font-bold bg-gray-800">
+                            <td>Total</td>
+                            <td class="text-right">${total_fi}</td>
+                            <td class="text-right">${formatNumber(total_hi)}</td>
+                            <td class="text-right">${formatNumber(total_hi * 100)}%</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    `;
+                    
+                    // --- GRÁFICO (CUALITATIVA) ---
+                    let chartOptions = JSON.parse(JSON.stringify(chartOptionsBase)); // Clonar base
+                    chartOptions.plugins.title.text = `Gráfico de Barras`; // SECCIÓN MODIFICADA
+                    chartOptions.scales.x.title.text = 'Categorías';
+                    
+                    window.myBarChart = new Chart(chartContext, {
+                        type: 'bar',
+                        data: {
+                            labels: tableData.map(row => row.category),
+                            datasets: [{
+                                label: 'Frecuencia (fi)',
+                                data: tableData.map(row => row.fi),
+                                backgroundColor: chartColor, // USAR COLOR SELECCIONADO
+                                borderColor: chartColor, // USAR COLOR SELECCIONADO
+                                borderWidth: 1
+                            }]
+                        },
+                        options: chartOptions
+                    });
+                    
+                } else if (isQuantitative && isDiscreta) {
+                    // ============ CASO B: VARIABLE CUANTITATIVA DISCRETA ============
+                    outputHtml += `<p><strong>Tipo de Variable:</strong> Cuantitativa Discreta (Sin Agrupar)</p>`;
+                    const freqMap = {};
+                    numericValues.forEach(val => { freqMap[val] = (freqMap[val] || 0) + 1; });
+                    const categories = Object.keys(freqMap).map(Number).sort((a, b) => a - b);
+                    
+                    outputHtml += `
+                    <p class="summary-table-header">Tabla de Frecuencias (Discreta)</p>
+                    <table class="summary-table">
+                        <thead class="bg-gray-100">
+                        <tr>
+                            <th>Valor (Xi)</th>
+                            <th class="text-right">fi(Freq)</th>
+                            <th class="text-right">Fi(Acum)</th>
+                            <th class="text-right">hi</th>
+                            <th class="text-right">Hi(Acum)</th>
+                            <th class="text-right">hi%</th>
+                            <th class="text-right">Hi%(Acum)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700">
+                    `;
+                    
+                    let total_fi = 0;
+                    let total_hi = 0;
+                    let cum_Fi = 0;
+                    let cum_Hi = 0;
+                    const chartLabels = [];
+                    const chartData = [];
+
+                    for (const category of categories) {
+                        const fi = freqMap[category];
+                        const hi = fi / n;
+                        cum_Fi += fi;
+                        cum_Hi += hi;
+                        const hiPorc = hi * 100;
+                        const HiPorc = cum_Hi * 100;
+                        total_fi += fi;
+                        total_hi += hi;
+                        chartLabels.push(category.toString());
+                        chartData.push(fi);
+
+                        outputHtml += `
+                            <tr>
+                                <td>${category}</td>
+                                <td class="text-right">${fi}</td>
+                                <td class="text-right">${cum_Fi}</td>
+                                <td class="text-right">${formatNumber(hi)}</td>
+                                <td class="text-right">${formatNumber(cum_Hi)}</td>
+                                <td class="text-right">${formatNumber(hiPorc)}%</td>
+                                <td class="text-right">${formatNumber(HiPorc)}%</td>
+                            </tr>
+                        `;
+                    }
+                    
+                    outputHtml += `
+                        <tr class="font-bold bg-gray-800">
+                            <td>Total</td>
+                            <td class="text-right">${total_fi}</td>
+                            <td class="text-right">--</td>
+                            <td class="text-right">${formatNumber(total_hi)}</td>
+                            <td class="text-right">--</td>
+                            <td class="text-right">${formatNumber(total_hi * 100)}%</td>
+                            <td class="text-right">--</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    `;
+                    
+                    // --- MEDIDAS DE RESUMEN (DISCRETA - SIN AGRUPAR) ---
+                    let sumPM = 0;
+                    numericValues.forEach(val => { sumPM += val; });
+                    const P_Mues = sumPM / n;
+
+                    const sortedValues = [...numericValues].sort((a, b) => a - b);
+                    let Me_Mues;
+                    if (n % 2 === 0) {
+                        Me_Mues = (sortedValues[n / 2 - 1] + sortedValues[n / 2]) / 2;
+                    } else {
+                        Me_Mues = sortedValues[Math.floor(n / 2)];
+                    }
+
+                    let Mo_Mues_str = 'Amodal';
+                    let maxFreq = 0;
+                    const freqCounts = {};
+                    numericValues.forEach(val => {
+                        freqCounts[val] = (freqCounts[val] || 0) + 1;
+                        if (freqCounts[val] > maxFreq) maxFreq = freqCounts[val];
+                    });
+                    if (maxFreq > 1 || n === 1) {
+                        const modes = Object.keys(freqCounts).filter(key => freqCounts[key] === maxFreq);
+                        const allSameFreq = categories.every(cat => freqCounts[cat] === maxFreq);
+                        if (modes.length > 0 && !(allSameFreq && modes.length > 1)) {
+                             Mo_Mues_str = modes.join(', ');
+                        }
+                    }
+
+                    let prodMG = 1;
+                    let validMG = true;
+                    for (const val of numericValues) {
+                        if (val <= 0) { validMG = false; break; }
+                        prodMG *= val;
+                    }
+                    const Me_Geo = validMG ? Math.pow(prodMG, 1 / n) : NaN;
+
+                    let sumMA = 0;
+                    let validMA = true;
+                    for (const val of numericValues) {
+                        if (val === 0) { validMA = false; break; }
+                        sumMA += 1 / val;
+                    }
+                    const Me_Arm = validMA ? (n / sumMA) : NaN;
+
+                    let sumVM = 0;
+                    numericValues.forEach(val => { sumVM += Math.pow(val - P_Mues, 2); });
+                    const Va_Mues = (n > 1) ? (sumVM / (n - 1)) : 0;
+                    const Des_Est = Math.sqrt(Va_Mues);
+                    const Cof_Var = Math.abs(Des_Est / P_Mues) * 100;
+                    
+                    outputHtml += `
+                    <p class="summary-table-header">Medidas de Resumen (Sin Agrupar)</p>
+                    <table class="summary-table">
+                        <thead class="bg-gray-100">
+                            <tr><th>Medida</th><th class="text-right">Valor</th></tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700">
+                            <tr><td>Promedio (X̄)</td><td class="text-right">${formatNumber(P_Mues)}</td></tr>
+                            <tr><td>Mediana (Me)</td><td class="text-right">${formatNumber(Me_Mues)}</td></tr>
+                            <tr><td>Moda (Mo)</td><td class="text-right">${Mo_Mues_str}</td></tr>
+                            <tr><td>Media Geométrica (Xg)</td><td class="text-right">${formatNumber(Me_Geo)}</td></tr>
+                            <tr><td>Media Armónica (Xh)</td><td class="text-right">${formatNumber(Me_Arm)}</td></tr>
+                            <tr><td>Varianza (S²)</td><td class="text-right">${formatNumber(Va_Mues)}</td></tr>
+                            <tr><td>Desviación Estándar (S)</td><td class="text-right">${formatNumber(Des_Est)}</td></tr>
+                            <tr><td>Coef. de Variación (C.V%)</td><td class="text-right">${formatNumber(Cof_Var)}%</td></tr>
+                        </tbody>
+                    </table>
+                    `;
+                    
+                    // --- GRÁFICO (CUANTITATIVA DISCRETA) ---
+                    let chartOptions = JSON.parse(JSON.stringify(chartOptionsBase)); // Clonar base
+                    chartOptions.plugins.title.text = `Gráfico de Barras`; // SECCIÓN MODIFICADA
+                    chartOptions.scales.x.title.text = 'Valor (Xi)';
+                    
+                    window.myBarChart = new Chart(chartContext, {
+                        type: 'bar',
+                        data: {
+                            labels: chartLabels,
+                            datasets: [{
+                                type: 'bar',
+                                label: 'Frecuencia (fi)',
+                                data: chartData,
+                                backgroundColor: chartColor, // USAR COLOR SELECCIONADO
+                                borderColor: chartColor, // USAR COLOR SELECCIONADO
+                                borderWidth: 1
+                            }]
+                        },
+                        options: chartOptions
+                    });
+
+                } else {
+                    // ============ CASO C: VARIABLE CUANTITATIVA CONTINUA (APDA) ============
+                    outputHtml += `<p><strong>Tipo de Variable:</strong> Cuantitativa Continua (Agrupados)</p>`;
+                    
+                    // --- INICIO DE LA LÓGICA APDA ---
+                    const y = numericValues;
+                    const n_ind = n;
+                    const vlrmax = Math.max(...y);
+                    const vlrmin = Math.min(...y);
+                    const rango = vlrmax - vlrmin;
+                    
+                    if (rango === 0) {
+                         outputHtml += '<span style="color: #EF4444; font-weight: bold;">[ERROR]</span><p>Todos los valores son idénticos (Rango = 0). No se puede crear una tabla de datos agrupados.</p>';
+                         analysisOutput.innerHTML = outputHtml;
+                         return;
+                    }
+                    
+                    const n_clases = Math.round(1 + 3.3 * Math.log10(n_ind));
+                    const amp = rango / n_clases;
+
+                    let LimInf = [];
+                    let LimSup = [];
+                    let Xi = [];
+                    let fabs = new Array(n_clases).fill(0);
+                    let frel = [];
+                    let frelPor = [];
+                    let fabsacum = [];
+                    let frelacum = [];
+                    let frelacumPor = [];
+                    let puntos = [];
+                    for (let i = 0; i <= n_clases; i++) { puntos.push(vlrmin + (i * amp)); }
+                    
+                    for (let i = 0; i < n_clases; i++) {
+                        LimInf[i] = puntos[i];
+                        LimSup[i] = puntos[i+1];
+                        Xi[i] = (puntos[i] + puntos[i+1]) / 2;
+                    }
+                    
+                    for (let j = 0; j < n_ind; j++) {
+                        const val = y[j];
+                        if (val === vlrmax) {
+                            fabs[n_clases - 1]++;
+                            continue;
+                        }
+                        for (let i = 0; i < n_clases; i++) {
+                            if (val >= puntos[i] && val < puntos[i+1]) {
+                                fabs[i]++;
+                                break;
+                            }
+                        }
+                    }
+
+                    let cum_fabs = 0;
+                    let cum_frel = 0;
+                    for (let i = 0; i < n_clases; i++) {
+                        frel[i] = fabs[i] / n_ind;
+                        frelPor[i] = frel[i] * 100;
+                        cum_fabs += fabs[i];
+                        cum_frel += frel[i];
+                        fabsacum[i] = cum_fabs;
+                        frelacum[i] = cum_frel;
+                        frelacumPor[i] = cum_frel * 100;
+                    }
+
+                    // --- Construir Tabla 1 (Frecuencias) ---
+                    outputHtml += `
+                    <p class="summary-table-header">Tabla de Frecuencias Para Datos Agrupados</p>
+                    <table class="summary-table">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th>Intervalo</th>
+                                <th>Xi</th>
+                                <th class="text-right">fi(Freq)</th>
+                                <th class="text-right">Fi(Acum)</th>
+                                <th class="text-right">hi</th>
+                                <th class="text-right">Hi(Acum)</th>
+                                <th class="text-right">hi%</th>
+                                <th class="text-right">Hi%(Acum)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700">
+                    `;
+                    
+                    let total_fi = 0;
+                    let total_hi = 0;
+                    const chartLabels = [];
+
+                    for (let i = 0; i < n_clases; i++) {
+                        const isLastInterval = (i === n_clases - 1);
+                        const intervalLabel = `[${formatNumber(LimInf[i])} - ${formatNumber(LimSup[i])}${isLastInterval ? ']' : ')'}`;
+                        
+                        chartLabels.push(intervalLabel);
+                        total_fi += fabs[i];
+                        total_hi += frel[i];
+
+                        outputHtml += `
+                            <tr>
+                                <td>${intervalLabel}</td>
+                                <td>${formatNumber(Xi[i])}</td>
+                                <td class="text-right">${fabs[i]}</td>
+                                <td class="text-right">${fabsacum[i]}</td>
+                                <td class="text-right">${formatNumber(frel[i])}</td>
+                                <td class="text-right">${formatNumber(frelacum[i])}</td>
+                                <td class="text-right">${formatNumber(frelPor[i])}%</td>
+                                <td class="text-right">${formatNumber(frelacumPor[i])}%</td>
+                            </tr>
+                        `;
+                    }
+                    
+                    outputHtml += `
+                        <tr class="font-bold bg-gray-800">
+                            <td colspan="2">Total</td>
+                            <td class="text-right">${total_fi}</td>
+                            <td class="text-right">--</td>
+                            <td class="text-right">${formatNumber(total_hi)}</td>
+                            <td class="text-right">--</td>
+                            <td class="text-right">${formatNumber(total_hi * 100)}%</td>
+                            <td class="text-right">--</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    `;
+
+                    // --- INICIO MEDIDAS DE RESUMEN (APDA - AGRUPADOS) ---
+                    let sumPM_ag = 0;
+                    for (let i = 0; i < n_clases; i++) { sumPM_ag += Xi[i] * fabs[i]; }
+                    const P_Mues_ag = sumPM_ag / n_ind;
+
+                    const n_medios = n_ind / 2;
+                    let w = 0;
+                    for (let i = 0; i < n_clases; i++) {
+                        if (fabsacum[i] >= n_medios) { w = i; break; }
+                    }
+                    const fabsacum_anterior = (w === 0) ? 0 : fabsacum[w-1];
+                    const Me_Mues_ag = (fabs[w] === 0) ? LimInf[w] : LimInf[w] + (((n_medios - fabsacum_anterior) / fabs[w]) * amp);
+
+                    let u = 0;
+                    let numMayor = 0;
+                    for (let i = 0; i < n_clases; i++) {
+                        if (fabs[i] > numMayor) { numMayor = fabs[i]; u = i; }
+                    }
+                    let Mo_Mues_ag;
+                    const d1 = (u === 0) ? (fabs[u] - 0) : (fabs[u] - fabs[u-1]);
+                    const d2 = (u === n_clases - 1) ? (fabs[u] - 0) : (fabs[u] - fabs[u+1]);
+                    if (d1 + d2 === 0) { Mo_Mues_ag = LimInf[u]; } 
+                    else { Mo_Mues_ag = LimInf[u] + ((d1 / (d1 + d2)) * amp); } // <-- ¡AQUÍ ESTÁ LA CORRECCIÓN! (Decía Mo_MGues_ag)
+                   
+                    let sumMG = 0;
+                    let validMG_ag = true;
+                    for (let i = 0; i < n_clases; i++) {
+                        if (Xi[i] <= 0) { validMG_ag = false; break; }
+                        sumMG += fabs[i] * Math.log10(Xi[i]);
+                    }
+                    const Me_Geo_ag = validMG_ag ? Math.pow(10, (sumMG / n_ind)) : NaN;
+
+                    let sumMA_ag = 0;
+                    let validMA_ag = true;
+                    for (let i = 0; i < n_clases; i++) {
+                        if (Xi[i] === 0) { validMA_ag = false; break; }
+                        sumMA_ag += fabs[i] / Xi[i];
+                    }
+                    const Me_Arm_ag = validMA_ag ? (n_ind / sumMA_ag) : NaN;
+
+                    let sumVM_ag = 0;
+                    for (let i = 0; i < n_clases; i++) {
+                        sumVM_ag += (Math.pow((Xi[i] - P_Mues_ag), 2)) * fabs[i];
+                    }
+                    const Va_Mues_ag = (n_ind > 1) ? (sumVM_ag / (n_ind - 1)) : 0;
+                    const Des_Est_ag = Math.sqrt(Va_Mues_ag);
+                    const Cof_Var_ag = Math.abs(Des_Est_ag / P_Mues_ag) * 100;
+                    
+                    outputHtml += `
+                    <p class="summary-table-header">Medidas de Resumen (Agrupados)</p>
+                    <table class="summary-table">
+                        <thead class="bg-gray-100">
+                            <tr><th>Medida</th><th class="text-right">Valor</th></tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700">
+                            <tr><td>Promedio (X̄)</td><td class="text-right">${formatNumber(P_Mues_ag)}</td></tr>
+                            <tr><td>Mediana (Me)</td><td class="text-right">${formatNumber(Me_Mues_ag)}</td></tr>
+                            <tr><td>Moda (Mo)</td><td class="text-right">${formatNumber(Mo_Mues_ag)}</td></tr>
+                            <tr><td>Media Geométrica (Xg)</td><td class="text-right">${formatNumber(Me_Geo_ag)}</td></tr>
+                            <tr><td>Media Armónica (Xh)</td><td class="text-right">${formatNumber(Me_Arm_ag)}</td></tr>
+                            <tr><td>Varianza (S²)</td><td class="text-right">${formatNumber(Va_Mues_ag)}</td></tr>
+                            <tr><td>Desviación Estándar (S)</td><td class="text-right">${formatNumber(Des_Est_ag)}</td></tr>
+                            <tr><td>Coef. de Variación (C.V%)</td><td class="text-right">${formatNumber(Cof_Var_ag)}%</td></tr>
+                        </tbody>
+                    </table>
+                    `;
+                    
+                    // --- GRÁFICO (CONTINUA - HISTOGRAMA) ---
+                    let chartOptions = JSON.parse(JSON.stringify(chartOptionsBase)); // Clonar base
+                    chartOptions.plugins.title.text = `Histograma de Frecuencias`; // SECCIÓN MODIFICADA
+                    chartOptions.scales.x.title.text = 'Intervalos';
+                    chartOptions.scales.x.barPercentage = 1.0;
+                    chartOptions.scales.x.categoryPercentage = 1.0;
+
+                    window.myBarChart = new Chart(chartContext, {
+                        type: 'bar',
+                        data: {
+                            labels: chartLabels,
+                            datasets: [{
+                                label: 'Frecuencia (fi)',
+                                data: fabs,
+                                backgroundColor: chartColor, // USAR COLOR SELECCIONADO
+                                borderColor: chartColor, // USAR COLOR SELECCIONADO
+                                borderWidth: 1
+                            }]
+                        },
+                        options: chartOptions
+                    });
+                }
+                
+                // 5. Mostrar la salida
+                analysisOutput.innerHTML = outputHtml;
+
+                // 6. Hacer scroll automático a los resultados en móvil
+                if (window.innerWidth < 1024) {
+                    resultsArea.scrollIntoView({ behavior: 'smooth' });
+                }
+
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+
+
